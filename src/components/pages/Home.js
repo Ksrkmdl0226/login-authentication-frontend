@@ -35,7 +35,7 @@ const Home = () => {
     );
   };
   const onError = (data) => {
-    toast.error(data?.message)
+    toast.error(data?.message);
   };
 
   const handleCloseModal = () => {
@@ -81,7 +81,6 @@ const Home = () => {
   });
 
   const onAddSuccess = (data) => {
-    ("success", data);
     toast.success(data?.message);
     initialFetch();
     handleCloseModal();
