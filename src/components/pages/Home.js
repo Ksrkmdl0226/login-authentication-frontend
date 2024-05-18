@@ -30,13 +30,12 @@ const Home = () => {
   };
 
   const onSuccess = (data) => {
-    console.log("success", data);
     setStudentsList(
       data?.data?.sort((val1, val2) => val2?.marks - val1?.marks)
     );
   };
   const onError = (data) => {
-    console.log("eror", data);
+    toast.error(data?.message)
   };
 
   const handleCloseModal = () => {
@@ -50,22 +49,18 @@ const Home = () => {
   };
 
   const onDetailsSuccess = (data) => {
-    console.log("success", data);
     setStudentDetails(data?.data);
   };
   const onDetailsError = (data) => {
-    console.log("eror", data);
     toast.error(data?.message);
   };
 
   const onDeleteSuccess = (data) => {
-    console.log("success", data);
     toast.success(data?.message);
     setCurrentData(null);
     initialFetch();
   };
   const onDeleteError = (data) => {
-    console.log("eror", data);
     toast.error(data?.message);
   };
 
@@ -86,19 +81,17 @@ const Home = () => {
   });
 
   const onAddSuccess = (data) => {
-    console.log("success", data);
+    ("success", data);
     toast.success(data?.message);
     initialFetch();
     handleCloseModal();
   };
   const onAddError = (data) => {
-    console.log("eror", data);
     toast.error(data?.message);
     handleCloseModal();
   };
 
   const onSubmit = async (values, { resetForm }) => {
-    console.log(values);
     if (studentDetails) {
       dispatch(
         updateStudent({

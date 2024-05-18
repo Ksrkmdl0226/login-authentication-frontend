@@ -8,7 +8,6 @@ export const getLogin = createAsyncThunk(
   "teacher/login",
   async ({ values, onLoginSuccess, onLoginError }) => {
     const res = await StudentApi.getLogin(values);
-    console.log("log", res);
     try {
       if (res?.status == 200) {
         return onLoginSuccess(res?.data);
@@ -25,9 +24,7 @@ export const getLogin = createAsyncThunk(
 export const addStudent = createAsyncThunk(
   "student/create",
   async ({ values, onAddSuccess, onAddError }) => {
-    console.log("payload data=", values);
     const res = await StudentApi.addStudent(values);
-    console.log(res, "add");
     try {
       if (res?.status == 200) {
         return onAddSuccess(res?.data);
@@ -44,7 +41,6 @@ export const addStudent = createAsyncThunk(
 export const getStudents = createAsyncThunk(
   "student/retrive",
   async (onSucess, onError) => {
-    console.log("all user data");
     const res = await StudentApi.getStudentAll();
     try {
       if (res?.status == 200) {
@@ -62,7 +58,6 @@ export const getStudents = createAsyncThunk(
 export const getStudentDetails = createAsyncThunk(
   "student/details",
   async ({ id, onDetailsSuccess, onDetailsError }) => {
-    console.log("all user data");
     const res = await StudentApi.getStudentDetails(id);
     try {
       if (res?.status == 200) {
@@ -80,7 +75,6 @@ export const getStudentDetails = createAsyncThunk(
 export const updateStudent = createAsyncThunk(
   "student/update",
   async ({ id, values, onAddSuccess, onAddError }) => {
-    console.log("update users data", id);
     const res = await StudentApi.patchStudent(id, values);
     try {
       if (res?.status == 200) {
@@ -97,7 +91,6 @@ export const updateStudent = createAsyncThunk(
 export const deleteStudent = createAsyncThunk(
   "student/delete",
   async ({ id, onDeleteSuccess, onDeleteError }) => {
-    console.log("delete users data", id);
     const res = await StudentApi.deleteStudent(id);
     try {
       if (res?.status == 200) {
