@@ -1,4 +1,4 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { applyMiddleware, configureStore } from "@reduxjs/toolkit";
 import StudentReducer from "../Reducer/StudentReducer";
 
 const rootReducer = {

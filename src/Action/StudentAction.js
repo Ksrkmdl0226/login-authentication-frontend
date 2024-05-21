@@ -4,102 +4,46 @@ import StudentApi from "../API/StudentApi";
 // createAsyncThunk(action, callback)
 
 // login
-export const getLogin = createAsyncThunk(
-  "teacher/login",
-  async ({ values, onLoginSuccess, onLoginError }) => {
-    const res = await StudentApi.getLogin(values);
-    try {
-      if (res?.status == 200) {
-        return onLoginSuccess(res?.data);
-      } else {
-        return onLoginError(res?.data);
-      }
-    } catch (error) {
-      return onLoginError(res?.data);
-    }
-  }
-);
+export const getLogin = createAsyncThunk("teacher/login", async (values) => {
+  console.log(values);
+  const res = await StudentApi.getLogin(values);
+  return res.data;
+});
 
 // to create new
-export const addStudent = createAsyncThunk(
-  "student/create",
-  async ({ values, onAddSuccess, onAddError }) => {
-    const res = await StudentApi.addStudent(values);
-    try {
-      if (res?.status == 200) {
-        return onAddSuccess(res?.data);
-      } else {
-        return onAddError(res?.data);
-      }
-    } catch (error) {
-      return onAddError(res?.data);
-    }
-  }
-);
+export const addStudent = createAsyncThunk("student/create", async (values) => {
+  const res = await StudentApi.addStudent(values);
+  return res.data;
+});
 
 // to read all
-export const getStudents = createAsyncThunk(
-  "student/retrive",
-  async (onSucess, onError) => {
-    const res = await StudentApi.getStudentAll();
-    try {
-      if (res?.status == 200) {
-        return onSucess(res?.data);
-      } else {
-        return onError(res?.data);
-      }
-    } catch (error) {
-      return onError(res?.data);
-    }
-  }
-);
+export const getStudents = createAsyncThunk("student/getAll", async () => {
+  const res = await StudentApi.getStudentAll();
+  return res.data;
+});
 
 // details
 export const getStudentDetails = createAsyncThunk(
   "student/details",
-  async ({ id, onDetailsSuccess, onDetailsError }) => {
+  async ({ id }) => {
     const res = await StudentApi.getStudentDetails(id);
-    try {
-      if (res?.status == 200) {
-        return onDetailsSuccess(res?.data);
-      } else {
-        return onDetailsError(res?.data);
-      }
-    } catch (error) {
-      return onDetailsError(res?.data);
-    }
+    return res.data;
   }
 );
 
 // to update
 export const updateStudent = createAsyncThunk(
   "student/update",
-  async ({ id, values, onAddSuccess, onAddError }) => {
+  async ({ id, values }) => {
     const res = await StudentApi.patchStudent(id, values);
-    try {
-      if (res?.status == 200) {
-        return onAddSuccess(res?.data);
-      } else {
-        return onAddError(res?.data);
-      }
-    } catch (error) {
-      return onAddError(res?.data);
-    }
+    return res.data;
   }
 );
 // to delete
 export const deleteStudent = createAsyncThunk(
   "student/delete",
-  async ({ id, onDeleteSuccess, onDeleteError }) => {
+  async ({ id }) => {
     const res = await StudentApi.deleteStudent(id);
-    try {
-      if (res?.status == 200) {
-        return onDeleteSuccess(res?.data);
-      } else {
-        return onDeleteError(res?.data);
-      }
-    } catch (error) {
-      return onDeleteError(res?.data);
-    }
+    return res.data;
   }
 );

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import * as Yup from "yup";
@@ -18,25 +18,16 @@ import ModalComponent from "./ModalComponent";
 const Home = () => {
   const [studentDetails, setStudentDetails] = useState(null);
   const dispatch = useDispatch();
-  const [studentsList, setStudentsList] = useState(null);
   const [currentData, setCurrentData] = useState(null);
+  const studentData = useSelector((state) => state?.students);
+
+  const initialFetch = useCallback(() => {
+    dispatch(getStudents());
+  }, [dispatch]);
 
   useEffect(() => {
     initialFetch();
-  }, []);
-
-  const initialFetch = async () => {
-    dispatch(getStudents(onSuccess, onError));
-  };
-
-  const onSuccess = (data) => {
-    setStudentsList(
-      data?.data?.sort((val1, val2) => val2?.marks - val1?.marks)
-    );
-  };
-  const onError = (data) => {
-    toast.error(data?.message);
-  };
+  }, [initialFetch]);
 
   const handleCloseModal = () => {
     document
@@ -45,27 +36,11 @@ const Home = () => {
   };
 
   const fetchDetails = async (id) => {
-    dispatch(getStudentDetails({ id: id, onDetailsSuccess, onDetailsError }));
-  };
-
-  const onDetailsSuccess = (data) => {
-    setStudentDetails(data?.data);
-  };
-  const onDetailsError = (data) => {
-    toast.error(data?.message);
-  };
-
-  const onDeleteSuccess = (data) => {
-    toast.success(data?.message);
-    setCurrentData(null);
-    initialFetch();
-  };
-  const onDeleteError = (data) => {
-    toast.error(data?.message);
-  };
-
-  const deleteDetails = async (id) => {
-    dispatch(deleteStudent({ id: id, onDeleteSuccess, onDeleteError }));
+    setStudentDetails(
+      studentData?.find((value, index) => {
+        return value?._id.toString() == id;
+      })
+    );
   };
 
   const initialValues = {
@@ -80,29 +55,36 @@ const Home = () => {
     marks: Yup.string().required("Marks must be Filled"),
   });
 
-  const onAddSuccess = (data) => {
-    toast.success(data?.message);
-    initialFetch();
-    handleCloseModal();
-  };
-  const onAddError = (data) => {
-    toast.error(data?.message);
-    handleCloseModal();
+  const deleteDetails = (id) => {
+    dispatch(deleteStudent({ id: id }))
+      .unwrap()
+      .then((res) => {
+        console.log(res);
+        toast.success(res?.message);
+      })
+      .catch((err) => toast.error(err?.message));
   };
 
-  const onSubmit = async (values, { resetForm }) => {
+  const submitHandler = async (values, { resetForm }) => {
     if (studentDetails) {
-      dispatch(
-        updateStudent({
-          id: studentDetails._id,
-          values: values,
-          onAddSuccess,
-          onAddError,
+      dispatch(updateStudent({ id: studentDetails?._id, values: values }))
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message);
+          handleCloseModal();
+          initialFetch();
         })
-      );
+        .catch((err) => toast.error(err.message));
     } else {
-      dispatch(addStudent({ values: values, onAddSuccess, onAddError }));
-      resetForm();
+      dispatch(addStudent(values))
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message);
+          initialFetch();
+
+          handleCloseModal();
+        })
+        .catch((err) => toast.error(err.message));
     }
     resetForm();
   };
@@ -134,7 +116,7 @@ const Home = () => {
               </tr>
             </thead>
             <tbody>
-              {studentsList?.map((item, index) => (
+              {studentData?.map((item, index) => (
                 <tr key={index} className="lh-lg">
                   <td>
                     <span className="rounded-circle h6 p-2 px-3 fw-medium bg-info">
@@ -212,7 +194,7 @@ const Home = () => {
                 <Formik
                   initialValues={initialValues}
                   validationSchema={currentValidation}
-                  onSubmit={onSubmit}
+                  onSubmit={submitHandler}
                   enableReinitialize={true}
                   // innerRef={ref}
                 >

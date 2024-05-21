@@ -24,8 +24,31 @@ const Login = () => {
     password: Yup.string().required("Password must be filled."),
   });
 
-  const submitHandler = async (values, { resetForm }) => {
-    let res = await axios
+  const onLoginSuccess = (data) => {
+    console.log("success", data);
+    toast.success(data?.message);
+  };
+
+  const onLoginError = (data) => {
+    console.log("success", data);
+    toast.success(data?.message);
+  };
+
+  const submitHandler = (values, { resetForm }) => {
+    // dispatch(getLogin(values))
+    //   .unwrap()
+    //   .then((res) => {
+    //     console.log(res);
+    //     toast.success(res?.message);
+    //     localStorage.setItem("accessToken", res?.token);
+    //     navigate("/home");
+    //   })
+    //   .catch((err) => {
+    //     toast.error(err?.message);
+    //     console.log(err);
+    //   });
+
+    let res = axios
       .post(`http://localhost:5500/api/v1/auth/login`, values)
       .then((response) => {
         toast.success(response?.data?.message);
