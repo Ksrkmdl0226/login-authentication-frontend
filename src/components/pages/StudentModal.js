@@ -2,10 +2,6 @@ import moment from "moment";
 import React, { useEffect } from "react";
 
 function StudentModal({ data, studentData, onClose }) {
-  useEffect(() => {
-    console.log(data);
-    console.log(studentData);
-  }, []);
   return (
     <div>
       <div

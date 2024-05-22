@@ -88,14 +88,12 @@ const Home = () => {
     dispatch(deleteStudent({ id: id }))
       .unwrap()
       .then((res) => {
-        console.log(res);
         toast.success('Deleted Successfully.');
       })
       .catch((err) => toast.error(err?.message));
   };
 
   const submitHandler = async (values, { resetForm }) => {
-    console.log(values);
     let extStudent = studentData?.find((item) => {
       return item?._id === studentDetails?._id;
     });
@@ -143,8 +141,6 @@ const Home = () => {
           })
           .catch((err) => toast.error(err.message));
       }
-
-      console.log("new data", newData);
     }
   };
 

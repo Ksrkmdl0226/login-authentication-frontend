@@ -5,7 +5,6 @@ import StudentApi from "../API/StudentApi";
 
 // login
 export const getLogin = createAsyncThunk("teacher/login", async (values) => {
-  console.log(values);
   const res = await StudentApi.getLogin(values);
   return res.data;
 });

@@ -26,7 +26,6 @@ const studentSlice = createSlice({
         ];
       })
       .addCase(updateStudent.fulfilled, (state, action) => {
-        console.log('stud', state);
         const index = state.findIndex(
           (item) => item._id === action.payload.data._id
         );
@@ -35,7 +34,6 @@ const studentSlice = createSlice({
         }
       })
       .addCase(deleteStudent.fulfilled, (state, action) => {
-        console.log(action);
         let index = state.findIndex(
           (item) => item?.id === action?.payload?.id
         );
