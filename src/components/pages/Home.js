@@ -14,12 +14,37 @@ import {
   updateStudent,
 } from "../../Action/StudentAction";
 import ModalComponent from "./ModalComponent";
+import moment from "moment";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import StudentModal from "./StudentModal";
 
 const Home = () => {
   const [studentDetails, setStudentDetails] = useState(null);
   const dispatch = useDispatch();
   const [currentData, setCurrentData] = useState(null);
   const studentData = useSelector((state) => state?.students);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [viewCalendar, setViewCalendar] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  const handleDateClick = (date) => {
+    setSelectedDate(date);
+    setShowDetails(true);
+    document
+      .getElementById("studentModal")
+      ?.classList?.add("show", "d-block", "modal-open");
+  };
+
+  const getTileContent = ({ date }) => {
+    const dateString = moment(date).format("YYYY-MM-DD");
+    const hasBirthdays = studentData?.some(
+      (val) => moment(val?.dateOfBirth).format("YYYY-MM-DD") === dateString
+    );
+    return hasBirthdays ? (
+      <div className="rounded-circle red-dot float-center position-absolute"></div>
+    ) : null;
+  };
 
   const initialFetch = useCallback(() => {
     dispatch(getStudents());
@@ -46,12 +71,16 @@ const Home = () => {
   const initialValues = {
     name: studentDetails?.name ? studentDetails?.name : "",
     subject: studentDetails?.subject ? studentDetails?.subject : "",
+    dateOfBirth: studentDetails?.dateOfBirth
+      ? moment(studentDetails?.dateOfBirth).format("YYYY-MM-DD")
+      : "",
     marks: studentDetails?.marks ? studentDetails?.marks : "",
   };
 
   const currentValidation = Yup.object().shape({
     name: Yup.string().required("Name Must be Filled."),
     subject: Yup.string().required("Subject Must be Filled."),
+    dateOfBirth: Yup.string().required("Date of Birth must be Choose."),
     marks: Yup.string().required("Marks must be Filled"),
   });
 
@@ -60,33 +89,63 @@ const Home = () => {
       .unwrap()
       .then((res) => {
         console.log(res);
-        toast.success(res?.message);
+        toast.success('Deleted Successfully.');
       })
       .catch((err) => toast.error(err?.message));
   };
 
   const submitHandler = async (values, { resetForm }) => {
-    if (studentDetails) {
-      dispatch(updateStudent({ id: studentDetails?._id, values: values }))
+    console.log(values);
+    let extStudent = studentData?.find((item) => {
+      return item?._id === studentDetails?._id;
+    });
+
+    if (extStudent) {
+      let newData = {
+        ...values,
+        dateOfBirth: moment(values?.dateOfBirth).format(),
+      };
+      dispatch(updateStudent({ id: extStudent?._id, values: newData }))
         .unwrap()
         .then((res) => {
           toast.success(res?.message);
           handleCloseModal();
-          initialFetch();
+          resetForm();
         })
         .catch((err) => toast.error(err.message));
     } else {
-      dispatch(addStudent(values))
-        .unwrap()
-        .then((res) => {
-          toast.success(res?.message);
-          initialFetch();
+      let exStudent = studentData?.find((item) => {
+        return values?.name == item?.name && values?.subject == item?.subject;
+      });
+      let newData = {
+        ...values,
+        dateOfBirth: moment(values?.dateOfBirth).format(),
+        marks: exStudent
+          ? (parseInt(exStudent?.marks) + parseInt(values?.marks)).toString()
+          : values?.marks,
+      };
+      if (exStudent) {
+        dispatch(updateStudent({ id: exStudent?._id, values: newData }))
+          .unwrap()
+          .then((res) => {
+            toast.success(res?.message);
+            handleCloseModal();
+            resetForm();
+          })
+          .catch((err) => toast.error(err.message));
+      } else {
+        dispatch(addStudent(newData))
+          .unwrap()
+          .then((res) => {
+            toast.success(res?.message);
+            handleCloseModal();
+            resetForm();
+          })
+          .catch((err) => toast.error(err.message));
+      }
 
-          handleCloseModal();
-        })
-        .catch((err) => toast.error(err.message));
+      console.log("new data", newData);
     }
-    resetForm();
   };
 
   return (
@@ -95,79 +154,119 @@ const Home = () => {
         <Navbar setCurrentData={setCurrentData} />
         <div className="p-5 mt-5">
           <div>
+            {!viewCalendar && (
+              <button
+                className="btn btn-outline-dark fw-bold"
+                data-bs-toggle="modal"
+                data-bs-target="#exampleModal"
+                onClick={() => {
+                  setStudentDetails(null);
+                }}
+              >
+                Add
+              </button>
+            )}
+
             <button
-              className="btn btn-outline-dark fw-bold"
-              data-bs-toggle="modal"
-              data-bs-target="#exampleModal"
+              className="btn btn-outline-dark fw-bold ms-2"
               onClick={() => {
-                setStudentDetails(null);
+                setViewCalendar(!viewCalendar);
               }}
             >
-              Add
+              {!viewCalendar ? "View Calender" : "Close Calendar"}
             </button>
           </div>
-          <table className="table table-responsive table-hover mt-4">
-            <thead>
-              <tr>
-                <th className="text-secondary fs-6">Name</th>
-                <th className="text-secondary fs-6">Subject</th>
-                <th className="text-secondary fs-6">Marks</th>
-                <th className="text-secondary fs-6">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {studentData?.map((item, index) => (
-                <tr key={index} className="lh-lg">
-                  <td>
-                    <span className="rounded-circle h6 p-2 px-3 fw-medium bg-info">
-                      {item?.name?.charAt(0)}
-                    </span>
-                    <span className="ms-3 fs-6 fw-medium">{item?.name}</span>
-                  </td>
-                  <td className="fs-6 ps-2">{item?.subject}</td>
-                  <td className="fs-6 ps-2">{item?.marks}</td>
-                  <td className="fs-6 ps-2">
-                    <div className="dropdown">
-                      <button
-                        className="btn btn-dark rounded-circle btn-sm dropdown-toggle"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      ></button>
-                      <ul
-                        className="dropdown-menu"
-                        aria-labelledby="dropdownMenuLink"
-                      >
-                        <li>
-                          <a
-                            className="dropdown-item f-14 fw-medium"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => fetchDetails(item?._id)}
-                            data-bs-toggle="modal"
-                            data-bs-target="#exampleModal"
-                          >
-                            Update
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            className="dropdown-item f-14 fw-medium"
-                            onClick={() => setCurrentData(item?._id)}
-                            // onClick={() => deleteDetails(item?._id)}
-                            style={{ cursor: "pointer" }}
-                            data-bs-toggle="modal"
-                            data-bs-target="#customModal"
-                          >
-                            Delete
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
+          {viewCalendar ? (
+            <div className="container">
+              <div className="row">
+                <div className="col-12 col-md-8 offset-0 offset-md-2">
+                  <Calendar
+                    tileContent={getTileContent}
+                    onClickDay={handleDateClick}
+                  />
+                  {showDetails && (
+                    <StudentModal
+                      data={selectedDate}
+                      studentData={studentData.find(
+                        (item) =>
+                          moment(item?.dateOfBirth).format(
+                            "DD-MMM-YYYY hh:mm"
+                          ) === moment(selectedDate).format("DD-MMM-YYYY hh:mm")
+                      )}
+                      onClose={() => setShowDetails(false)}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <table className="table table-responsive table-hover mt-4">
+              <thead>
+                <tr>
+                  <th className="text-secondary fs-6">Name</th>
+                  <th className="text-secondary fs-6">Date of Birth</th>
+                  <th className="text-secondary fs-6">Subject</th>
+                  <th className="text-secondary fs-6">Marks</th>
+                  <th className="text-secondary fs-6">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {studentData?.map((item, index) => (
+                  <tr key={index} className="lh-lg">
+                    <td>
+                      <span className="rounded-circle h6 p-2 px-3 fw-medium bg-info">
+                        {item?.name?.charAt(0)}
+                      </span>
+                      <span className="ms-3 fs-6 fw-medium">{item?.name}</span>
+                    </td>
+                    <td className="fs-6 ps-2">
+                      {moment(item?.dateOfBirth).format("DD-MMM-YYYY")}
+                    </td>
+                    <td className="fs-6 ps-2">{item?.subject}</td>
+                    <td className="fs-6 ps-2">{item?.marks}</td>
+                    <td className="fs-6 ps-2">
+                      <div className="dropdown">
+                        <button
+                          className="btn btn-dark rounded-circle btn-sm dropdown-toggle"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        ></button>
+                        <ul
+                          className="dropdown-menu"
+                          aria-labelledby="dropdownMenuLink"
+                        >
+                          <li>
+                            <a
+                              className="dropdown-item f-14 fw-medium"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => fetchDetails(item?._id)}
+                              data-bs-toggle="modal"
+                              data-bs-target="#exampleModal"
+                            >
+                              Update
+                            </a>
+                          </li>
+                          <li>
+                            <a
+                              className="dropdown-item f-14 fw-medium"
+                              onClick={() => setCurrentData(item?._id)}
+                              // onClick={() => deleteDetails(item?._id)}
+                              style={{ cursor: "pointer" }}
+                              data-bs-toggle="modal"
+                              data-bs-target="#customModal"
+                            >
+                              Delete
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
         {/* modal */}
         <div
@@ -210,6 +309,22 @@ const Home = () => {
                           type="text"
                         />
                         <ErrorMessage name={"name"}>
+                          {(msg) => (
+                            <div className="text-danger f-12">{msg}</div>
+                          )}
+                        </ErrorMessage>
+                      </div>
+                      <div className="form-group mt-2">
+                        <label className="form-Label mb-1">
+                          Date of Birth
+                          <strong className="text-danger">*</strong>
+                        </label>
+                        <Field
+                          name={"dateOfBirth"}
+                          className="form-control form-border"
+                          type="date"
+                        />
+                        <ErrorMessage name={"dateOfBirth"}>
                           {(msg) => (
                             <div className="text-danger f-12">{msg}</div>
                           )}
@@ -265,6 +380,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+
       {/* delete modal */}
       <ModalComponent deleteFunc={deleteDetails} currentData={currentData} />
     </div>

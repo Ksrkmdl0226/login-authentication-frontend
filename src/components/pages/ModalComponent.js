@@ -35,13 +35,13 @@ const ModalComponent = ({ deleteFunc, currentData }) => {
                 : "Are you sure want to logout?"}
             </div>
           </div>
-          <div class="modal-footer text-end">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+          <div className="modal-footer text-end">
+            <button type="button" className="btn btn-light" data-bs-dismiss="modal">
               Close
             </button>
             <button
               type="button"
-              class={`btn ${currentData ? "btn-danger" : "btn-secondary"}`}
+              className={`btn ${currentData ? "btn-danger" : "btn-secondary"}`}
               onClick={() => {
                 if (currentData) {
                   deleteFunc(currentData);

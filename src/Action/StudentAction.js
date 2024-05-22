@@ -44,6 +44,6 @@ export const deleteStudent = createAsyncThunk(
   "student/delete",
   async ({ id }) => {
     const res = await StudentApi.deleteStudent(id);
-    return res.data;
+    return {id};
   }
 );

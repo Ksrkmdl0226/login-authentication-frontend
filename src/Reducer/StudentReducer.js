@@ -26,15 +26,19 @@ const studentSlice = createSlice({
         ];
       })
       .addCase(updateStudent.fulfilled, (state, action) => {
-        let index = state.findIndex((item) => item?.id === action?.payload?.id);
-        state[index] = {
-          ...state[index],
-          ...action.payload.data,
-        };
+        console.log('stud', state);
+        const index = state.findIndex(
+          (item) => item._id === action.payload.data._id
+        );
+        if (index !== -1) {
+          state[index] = action.payload.data;
+        }
       })
       .addCase(deleteStudent.fulfilled, (state, action) => {
         console.log(action);
-        let index = state.findIndex((item) => item?.id === action?.meta?.arg?.id);
+        let index = state.findIndex(
+          (item) => item?.id === action?.payload?.id
+        );
         state.splice(index, 1);
       });
   },
